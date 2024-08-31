@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!--    weather colors-->
+    <color name="clear_day_1">#FF85A4DE</color>
+    <color name="clear_day_2">#FF5D92CB</color>
+    <color name="clear_night_1_hot">#FF45457A</color>
+    <color name="clear_night_2_hot">#FF393C6D</color>
+    <color name="clear_night_1_very_hot">#FF607191</color>
+    <color name="clear_night_2_very_hot">#FFC05F4E</color>
+    <color name="clear_night_1_cold">#FF515466</color>
+    <color name="clear_night_2_cold">#FF3A3A46</color>
+    <color name="mostly_cloud_day_1">#FF5496DF</color>
+    <color name="mostly_cloud_day_2">#FF6AA1CE</color>
+    <color name="cloudy_day_1">#FF85A4DE</color>
+    <color name="cloudy_day_2">#FF5D92CB</color>
+    <color name="cloudy_night_1_hot">#FF4A4A82</color>
+    <color name="cloudy_night_2_hot">#FFA76D7A</color>
+    <color name="cloudy_night_1_cold">#FF4A4A82</color>
+    <color name="cloudy_night_2_cold">#FF645681</color>
+    <color name="drizzle_day_1">#FF7FB5B8</color>
+    <color name="drizzle_day_2">#FF487EA7</color>
+    <color name="haze_day_1">#FF8080D0</color>
+    <color name="haze_day_2">#FF959BE4</color>
+    <color name="snow_day_1">#FF414190</color>
+    <color name="snow_day_2">#FF359EB3</color>
+
+    <color name="clear_background_day">#FF5590CE</color>
+    <color name="clear_background_night_very_hot">#E3B775</color>
+    <color name="clear_background_night_hot">#FF2F3457</color>
+    <color name="clear_background_night_cold">#FF393D4C</color>
+    <color name="mostly_cloudy_background_day">#FF5590CE</color>
+    <color name="cloudy_background_day">#FF5590CE</color>
+    <color name="cloudy_background_night_hot">#FF755570</color>
+    <color name="cloudy_background_night_cold">#FF6D72CF</color>
+    <color name="drizzle_background_day">#FF3C7BA9</color>
+    <color name="snow_background_day">#FF3C7BA9</color>
+    <color name="haze_background_day">#FF6D72CF</color>
+</resources>
