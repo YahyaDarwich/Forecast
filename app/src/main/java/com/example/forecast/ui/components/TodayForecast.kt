@@ -92,7 +92,7 @@ fun TodayForecast(
         }
 
         LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(15.dp),
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
@@ -113,7 +113,8 @@ fun TodayForecast(
                     elevation = 3.dp,
                     cornerSize = 25.dp,
                     modifier = Modifier
-                        .size(55.dp, 150.dp)
+                        .size(65.dp, 150.dp)
+                        .padding(horizontal = 5.dp)
                 )
             }
         }
@@ -165,7 +166,7 @@ fun TimeWeatherInfoItem(
 
 //@Preview
 @Composable
-fun PreviewTimeWeatherInfoItem() {
+private fun PreviewTimeWeatherInfoItem() {
     TimeWeatherInfoItem(
         "10 AM",
         R.drawable.baseline_place_24,

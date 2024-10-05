@@ -7,6 +7,7 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="white_80">#CCFFFFFF</color>
 
     <!--    weather colors-->
     <color name="clear_day_1">#FF85A4DE</color>
@@ -43,4 +44,10 @@
     <color name="drizzle_background_day">#FF3C7BA9</color>
     <color name="snow_background_day">#FF3C7BA9</color>
     <color name="haze_background_day">#FF6D72CF</color>
+
+    <color name="humidity_progress_background">#FFEE58</color>
+    <color name="humidity_progress">#FFCA28</color>
+
+    <color name="shimmer_light">#DEDEDE</color> <!-- Light gray for light mode -->
+    <color name="shimmer_dark">#303030</color>  <!-- Dark gray for dark mode -->
 </resources>

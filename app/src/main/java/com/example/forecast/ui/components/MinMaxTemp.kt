@@ -76,7 +76,7 @@ fun MinMaxTemp(
 
 //@Preview
 @Composable
-fun PreviewMinMaxTemp() {
+private fun PreviewMinMaxTemp() {
     MinMaxTemp(
         16,
         10,

@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">forecast</string>
+    <string name="fake_degree">22°</string>
+    <string name="hight_temp">H:</string>
+    <string name="low_temp">L:</string>
+    <string name="fake_hight_temp">24°</string>
+    <string name="fake_low_temp">18°</string>
+    <string name="fake_place">Assoun/Lebanon</string>
+    <string name="overcast_clouds">Overcast Clouds</string>
 </resources>

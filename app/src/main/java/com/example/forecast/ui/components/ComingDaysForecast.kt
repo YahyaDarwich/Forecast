@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -49,30 +50,28 @@ fun ComingDaysForecast(
                 .fillMaxSize(),
             contentPadding = PaddingValues(dimensionResource(id = R.dimen.padding_small))
         ) {
-            daysForecast.toList().forEachIndexed { index, (date, weatherList) ->
+            itemsIndexed(items = daysForecast.toList()) { index, (date, weatherList) ->
                 val weather1 = weatherList[0]
                 val weather2 = if (weatherList.size > 1) weatherList[1] else null
 
-                item {
-                    ComingDayItem(
-                        dayName = if (index == 0) "today" else DateHelper.formatDate(
-                            weather1.dt_txt,
-                            outputPattern = "EEEE"
-                        ),
-                        humidity = (weather1.main.humidity + (weather2?.main?.humidity ?: 0)) / 2,
-                        maxTempWeatherIcon = getWeatherIcon(
-                            weather1.weather[0].id,
-                            weather1.weather[0].icon
-                        ),
-                        minTempWeatherIcon = weather2?.weather?.get(0)?.let {
-                            getWeatherIcon(
-                                it.id, it.icon
-                            )
-                        },
-                        maxWeatherTemp = weather1.main.temp.roundToInt(),
-                        minWeatherTemp = weather2?.main?.temp?.roundToInt()
-                    )
-                }
+                ComingDayItem(
+                    dayName = if (index == 0) "today" else DateHelper.formatDate(
+                        weather1.dt_txt,
+                        outputPattern = "EEEE"
+                    ),
+                    humidity = (weather1.main.humidity + (weather2?.main?.humidity ?: 0)) / 2,
+                    maxTempWeatherIcon = getWeatherIcon(
+                        weather1.weather[0].id,
+                        weather1.weather[0].icon
+                    ),
+                    minTempWeatherIcon = weather2?.weather?.get(0)?.let {
+                        getWeatherIcon(
+                            it.id, it.icon
+                        )
+                    },
+                    maxWeatherTemp = weather1.main.temp.roundToInt(),
+                    minWeatherTemp = weather2?.main?.temp?.roundToInt()
+                )
             }
         }
     }
@@ -131,8 +130,11 @@ fun ComingDayItem(
 
             if (minWeatherTemp != null) {
                 Text(
-                    text = "$minWeatherTemp°", color = textColor, fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.weight(1f), textAlign = TextAlign.Center
+                    text = "$minWeatherTemp°",
+                    color = textColor,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center
                 )
             }
         }
@@ -141,7 +143,7 @@ fun ComingDayItem(
 
 //@Preview
 @Composable
-fun PreviewComingDayItem() {
+private fun PreviewComingDayItem() {
     ComingDayItem(
         dayName = "today",
         humidity = 25,

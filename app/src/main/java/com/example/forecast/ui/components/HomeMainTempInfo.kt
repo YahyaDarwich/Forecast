@@ -44,7 +44,7 @@ fun HomeMainTempInfo(
 
 @Preview
 @Composable
-fun PreviewHomeMainTempInfo() {
+private fun PreviewHomeMainTempInfo() {
     HomeMainTempInfo(22, R.drawable.drizzle_sunny, Modifier.size(120.dp), Modifier.fillMaxWidth())
 }
 

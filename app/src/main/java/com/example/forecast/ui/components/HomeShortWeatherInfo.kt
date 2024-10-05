@@ -128,7 +128,7 @@ fun HomeShortWeatherInfo(
 
 @Preview
 @Composable
-fun PreviewHomeShortWeatherInfo() {
+private fun PreviewHomeShortWeatherInfo() {
     HomeShortWeatherInfo(
         20,
         50,
