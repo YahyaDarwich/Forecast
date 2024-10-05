@@ -3,6 +3,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
 android {
@@ -16,7 +17,7 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        buildConfigField("String", "API_KEY", "${getProperties("API_KEY")}")
+//        buildConfigField("String", "API_KEY", "${getProperties("API_KEY")}")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
@@ -72,7 +73,7 @@ fun getProperties(key: String): String {
     }
 
     return localProperties.getProperty(key)
-        ?: throw GradleException("api_key not found in local.properties")
+        ?: throw GradleException("$key not found in local.properties")
 }
 
 dependencies {
