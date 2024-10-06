@@ -1,7 +1,6 @@
 package com.example.forecast.ui.screens
 
 import android.content.res.Configuration
-import androidx.compose.animation.core.InfiniteRepeatableSpec
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
@@ -18,12 +17,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -39,14 +36,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
@@ -55,9 +50,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.glance.appwidget.SizeMode
 import com.example.forecast.R
 import com.example.forecast.model.CurrentWeather
+import com.example.forecast.ui.components.AiTodayWeatherReport
 import com.example.forecast.ui.components.ComingDaysForecast
 import com.example.forecast.ui.components.FeelsLike
 import com.example.forecast.ui.components.HomeMainTempInfo
@@ -71,7 +66,11 @@ import com.example.forecast.ui.components.Wind
 import kotlin.math.roundToInt
 
 @Composable
-fun HomeScreen(weatherUIState: WeatherUIState, paddingValues: PaddingValues) {
+fun HomeScreen(
+    weatherUIState: WeatherUIState,
+    todayWeatherReportUiState: TodayWeatherReportUiState,
+    paddingValues: PaddingValues
+) {
     when (weatherUIState) {
         is WeatherUIState.Loading -> LoadingBody()
         is WeatherUIState.Success ->
@@ -79,7 +78,8 @@ fun HomeScreen(weatherUIState: WeatherUIState, paddingValues: PaddingValues) {
                 Modifier,
                 weatherUIState.currentWeather,
                 weatherUIState.todayForecast,
-                weatherUIState.upcomingDaysForecast
+                weatherUIState.upcomingDaysForecast,
+                todayWeatherReportUiState
             )
 
         is WeatherUIState.Error -> Text(text = "error")
@@ -91,7 +91,8 @@ fun HomeBody(
     modifier: Modifier,
     currentWeather: CurrentWeather,
     todayForecast: List<CurrentWeather>,
-    upcomingDaysForecast: Map<String, MutableList<CurrentWeather>>
+    upcomingDaysForecast: Map<String, MutableList<CurrentWeather>>,
+    todayWeatherReportUiState: TodayWeatherReportUiState
 ) {
     val scrollState = rememberScrollState()
 
@@ -158,10 +159,31 @@ fun HomeBody(
                 currentWeather.main.temp_min.roundToInt(),
                 color = itemsOverlayColor,
                 textColor = Color.White,
+                elevation = 1.dp,
                 modifier = Modifier
                     .align(Alignment.Start)
                     .size(100.dp, 75.dp)
                     .padding(bottom = dimensionResource(id = R.dimen.padding_extra_extra_large))
+            )
+
+            AiTodayWeatherReport(
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .wrapContentHeight()
+                    .padding(
+                        bottom = dimensionResource(id = R.dimen.padding_mid_large)
+                    ),
+                cornerRadius = cornerRadius,
+                backgroundColor = itemsOverlayColor,
+                loadingColor = overlayColor,
+                collapsedMaxLines = 3,
+                isLoading = todayWeatherReportUiState == TodayWeatherReportUiState.Loading,
+                weatherReport = when (todayWeatherReportUiState) {
+                    is TodayWeatherReportUiState.Success -> todayWeatherReportUiState.summaryReport
+                        ?: "No report"
+
+                    else -> "No report"
+                }
             )
 
             HomeShortWeatherInfo(
@@ -172,7 +194,8 @@ fun HomeBody(
                 color = itemsOverlayColor,
                 dividerColor = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier
-                    .size(330.dp, 110.dp)
+                    .fillMaxWidth(0.9f)
+                    .wrapContentHeight()
                     .padding(bottom = dimensionResource(id = R.dimen.padding_mid_large))
             )
 
@@ -336,7 +359,8 @@ fun LoadingBody() {
                 .padding(
                     bottom = dimensionResource(id = R.dimen.padding_mid_large)
                 )
-                .size(330.dp, 110.dp),
+                .height(110.dp)
+                .fillMaxWidth(0.9f),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
@@ -588,6 +612,20 @@ fun getWeatherOverlayColor(id: Int, iconCode: String, temperature: Int): Color {
 }
 
 fun Modifier.shimmerEffect(): Modifier = composed {
+    customShimmerEffect(
+        colors = listOf(
+            shimmerColor(),
+            shimmerColor().copy(0.5f),
+            shimmerColor()
+        ), fromTopStart = true
+    )
+}
+
+fun Modifier.customShimmerEffect(
+    colors: List<Color>,
+    fromTopStart: Boolean,
+    animationDuration: Int = 1000
+): Modifier = composed {
     var size by remember {
         mutableStateOf(IntSize.Zero)
     }
@@ -596,17 +634,13 @@ fun Modifier.shimmerEffect(): Modifier = composed {
     val startOffsetX by transition.animateFloat(
         initialValue = -2 * size.width.toFloat(),
         targetValue = 2 * size.width.toFloat(),
-        animationSpec = infiniteRepeatable(animation = tween(1000)), label = "shimmer effect"
+        animationSpec = infiniteRepeatable(animation = tween(animationDuration)), label = "shimmer effect"
     )
 
     background(
         brush = Brush.linearGradient(
-            colors = listOf(
-                shimmerColor(),
-                shimmerColor().copy(0.5f),
-                shimmerColor()
-            ),
-            start = Offset(startOffsetX, 0f),
+            colors = colors,
+            start = Offset(startOffsetX, if (fromTopStart) 0f else size.height.toFloat()),
             end = Offset(startOffsetX + size.width.toFloat(), size.height.toFloat())
         )
     ).onGloballyPositioned { size = it.size }

@@ -34,13 +34,15 @@ fun MinMaxTemp(
     minTemp: Int,
     color: Color,
     textColor: Color,
-    modifier: Modifier
+    modifier: Modifier,
+    elevation: Dp
 ) {
     Box(modifier) {
         Card(
             Modifier
                 .fillMaxSize(),
             colors = CardDefaults.cardColors(containerColor = color),
+            elevation = CardDefaults.cardElevation(elevation),
 //            border = BorderStroke(1.dp, MaterialTheme.colorScheme.onPrimary),
             shape = RoundedCornerShape(20.dp)
         ) {
@@ -83,6 +85,6 @@ private fun PreviewMinMaxTemp() {
         color = Color.Transparent,
         textColor = Color.White,
         modifier = Modifier
-            .size(100.dp, 30.dp)
+            .size(100.dp, 30.dp), elevation = 1.dp
     )
 }

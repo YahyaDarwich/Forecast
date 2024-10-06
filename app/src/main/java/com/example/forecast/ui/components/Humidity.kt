@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -43,7 +44,7 @@ fun Humidity(
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
-                modifier = Modifier.padding(10.dp),
+                modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_medium)),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 IconLabelItem(
@@ -70,7 +71,7 @@ fun Humidity(
                 modifier = Modifier
                     .fillMaxHeight(0.8f)
                     .align(Alignment.CenterEnd)
-                    .padding(end = 20.dp),
+                    .padding(end = dimensionResource(id = R.dimen.padding_medium)),
                 progress = humidity / 100f,
                 width = 30.dp,
                 backgroundColor = progressBackgroundColor,

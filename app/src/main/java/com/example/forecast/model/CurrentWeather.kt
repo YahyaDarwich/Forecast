@@ -9,6 +9,7 @@ data class CurrentWeather(
     val visibility: Int,
     val wind: Wind,
     val rain: Rain? = null,
+    val sys: Sys? = null,
     val clouds: Clouds,
     val id: Int,
     val name: String?,
@@ -39,3 +40,6 @@ data class Rain(val `1h`: Float = 0f)
 
 @Serializable
 data class Clouds(val all: Int)
+
+@Serializable
+data class Sys(val country: String?, val sunrise: Long, val sunset: Long)

@@ -26,6 +26,7 @@ class MainActivity : ComponentActivity() {
                     val homeViewModel: HomeViewModel = viewModel(factory = HomeViewModel.Factory)
                     HomeScreen(
                         weatherUIState = homeViewModel.weatherUIState,
+                        todayWeatherReportUiState = homeViewModel.todayWeatherReportUiState,
                         paddingValues = innerPadding
                     )
                 }

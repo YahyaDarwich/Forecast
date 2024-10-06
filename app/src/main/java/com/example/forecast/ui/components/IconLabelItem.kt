@@ -19,13 +19,13 @@ import androidx.compose.ui.unit.TextUnit
 
 @Composable
 fun IconLabelItem(
+    modifier: Modifier = Modifier,
     label: String,
     fontSize: TextUnit,
     textColor: Color = Color.White,
     iconRes: Int,
     iconDesc: String,
     fontWeight: FontWeight? = null,
-    modifier: Modifier = Modifier,
     iconModifier: Modifier
 ) {
     Row(

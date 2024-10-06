@@ -9,33 +9,68 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.forecast.BuildConfig
 import com.example.forecast.WeatherApplication
 import com.example.forecast.data.WeatherAppRepository
 import com.example.forecast.model.CurrentWeather
 import com.example.forecast.model.Forecast
+import com.google.ai.client.generativeai.GenerativeModel
+import com.google.ai.client.generativeai.type.BlockThreshold
+import com.google.ai.client.generativeai.type.GenerationConfig
+import com.google.ai.client.generativeai.type.HarmCategory
+import com.google.ai.client.generativeai.type.SafetySetting
+import com.google.ai.client.generativeai.type.generationConfig
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
 
 class HomeViewModel(weatherAppRepository: WeatherAppRepository) : ViewModel() {
     var weatherUIState: WeatherUIState by mutableStateOf(WeatherUIState.Loading)
+    var todayWeatherReportUiState: TodayWeatherReportUiState by mutableStateOf(
+        TodayWeatherReportUiState.Loading
+    )
+    private val model: GenerativeModel = GenerativeModel(
+        "gemini-1.5-flash",
+        BuildConfig.geminiApiKey,
+        generationConfig = generationConfig {
+            temperature = 1f
+            topK = 64
+            topP = 0.95f
+            maxOutputTokens = 8192
+            responseMimeType = "text/plain"
+        }, safetySettings = listOf(
+            SafetySetting(HarmCategory.HARASSMENT, BlockThreshold.MEDIUM_AND_ABOVE),
+            SafetySetting(HarmCategory.HATE_SPEECH, BlockThreshold.MEDIUM_AND_ABOVE),
+            SafetySetting(HarmCategory.SEXUALLY_EXPLICIT, BlockThreshold.MEDIUM_AND_ABOVE),
+            SafetySetting(HarmCategory.DANGEROUS_CONTENT, BlockThreshold.MEDIUM_AND_ABOVE),
+        )
+    )
 
     init {
         viewModelScope.launch {
             weatherUIState = WeatherUIState.Loading
-            weatherUIState = try {
+            try {
                 val lat = "34.38586232938427"
                 val long = "36.009997289005724"
+                val todayForecast = weatherAppRepository.getTodayForecast(lat, long)
 
-                WeatherUIState.Success(
+                weatherUIState = WeatherUIState.Success(
                     weatherAppRepository.getCurrentWeather(lat, long),
-                    weatherAppRepository.getTodayForecast(lat, long),
+                    todayForecast,
                     weatherAppRepository.getUpcomingDaysForecast(lat, long)
                 )
+
+                delay(1000)
+                todayWeatherReportUiState = try {
+                    TodayWeatherReportUiState.Success(model.generateContent("give me summary for today weather from these data $todayForecast").text)
+                } catch (e: Exception) {
+                    TodayWeatherReportUiState.Error
+                }
             } catch (e: IOException) {
-                WeatherUIState.Error
+                weatherUIState = WeatherUIState.Error
             } catch (e: HttpException) {
-                WeatherUIState.Error
+                weatherUIState = WeatherUIState.Error
             }
         }
     }
@@ -57,6 +92,12 @@ sealed interface WeatherUIState {
         val upcomingDaysForecast: Map<String, MutableList<CurrentWeather>>
     ) : WeatherUIState
 
-    object Error : WeatherUIState
-    object Loading : WeatherUIState
+    data object Error : WeatherUIState
+    data object Loading : WeatherUIState
+}
+
+sealed interface TodayWeatherReportUiState {
+    data class Success(val summaryReport: String?) : TodayWeatherReportUiState
+    data object Error : TodayWeatherReportUiState
+    data object Loading : TodayWeatherReportUiState
 }

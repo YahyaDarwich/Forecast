@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -49,7 +50,7 @@ fun HomeShortWeatherInfo(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(vertical = 10.dp)
+                    .padding(vertical = dimensionResource(id = R.dimen.padding_large))
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
