@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -28,6 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,6 +43,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -245,6 +248,14 @@ fun GridWeatherInfo(
     itemsOverlayColor: Color,
     cornerRadius: Dp
 ) {
+    var humidityItemVisibility by remember {
+        mutableStateOf(false)
+    }
+
+    var humidityItemHasBeenVisible by remember {
+        mutableStateOf(false)
+    }
+
     LazyVerticalGrid(
         modifier = modifier,
         columns = GridCells.Fixed(2),
@@ -254,13 +265,22 @@ fun GridWeatherInfo(
         item {
             Humidity(
                 modifier = Modifier
+                    .onGloballyPositioned {
+                        if (!humidityItemHasBeenVisible &&
+                            it.boundsInWindow().bottom > -it.boundsInWindow().height / 2
+                        ) {
+                            humidityItemVisibility = true
+                            humidityItemHasBeenVisible = true
+                        }
+                    }
                     .fillMaxWidth()
                     .aspectRatio(1f),
                 humidity = currentWeather.main.humidity,
                 backgroundColor = itemsOverlayColor,
                 progressBackgroundColor = colorResource(id = R.color.humidity_progress_background),
                 progressColor = colorResource(id = R.color.humidity_progress),
-                cornerRadius = cornerRadius
+                cornerRadius = cornerRadius,
+                isVisible = humidityItemVisibility
             )
         }
 
@@ -634,7 +654,8 @@ fun Modifier.customShimmerEffect(
     val startOffsetX by transition.animateFloat(
         initialValue = -2 * size.width.toFloat(),
         targetValue = 2 * size.width.toFloat(),
-        animationSpec = infiniteRepeatable(animation = tween(animationDuration)), label = "shimmer effect"
+        animationSpec = infiniteRepeatable(animation = tween(animationDuration)),
+        label = "shimmer effect"
     )
 
     background(
