@@ -3,6 +3,7 @@ package com.example.forecast.ui.components
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -50,6 +51,10 @@ fun AiTodayWeatherReport(
     loadingColor: Color,
     collapsedMaxLines: Int
 ) {
+    val interactionSource = remember {
+        MutableInteractionSource()
+    }
+
     var isExpanded by remember {
         mutableStateOf(false)
     }
@@ -57,8 +62,9 @@ fun AiTodayWeatherReport(
     Card(
         colors = CardDefaults.cardColors(containerColor = backgroundColor),
         shape = RoundedCornerShape(cornerRadius),
-        modifier = modifier,
-        onClick = { if (!isLoading) isExpanded = !isExpanded }
+        modifier = modifier.clickable(indication = null, interactionSource = interactionSource) {
+            if (!isLoading) isExpanded = !isExpanded
+        },
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
