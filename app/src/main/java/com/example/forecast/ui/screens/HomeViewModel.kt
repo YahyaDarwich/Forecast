@@ -1,5 +1,6 @@
 package com.example.forecast.ui.screens
 
+import android.location.Location
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -11,6 +12,8 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.forecast.BuildConfig
 import com.example.forecast.WeatherApplication
+import com.example.forecast.data.LocationRepository
+import com.example.forecast.data.WeatherAppPreferencesRepository
 import com.example.forecast.data.WeatherAppRepository
 import com.example.forecast.model.CurrentWeather
 import com.example.forecast.model.Forecast
@@ -21,11 +24,17 @@ import com.google.ai.client.generativeai.type.HarmCategory
 import com.google.ai.client.generativeai.type.SafetySetting
 import com.google.ai.client.generativeai.type.generationConfig
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
 
-class HomeViewModel(weatherAppRepository: WeatherAppRepository) : ViewModel() {
+class HomeViewModel(
+    weatherAppRepository: WeatherAppRepository,
+    weatherLocationRepository: LocationRepository,
+    weatherAppPreferencesRepository: WeatherAppPreferencesRepository
+) : ViewModel() {
     var weatherUIState: WeatherUIState by mutableStateOf(WeatherUIState.Loading)
     var todayWeatherReportUiState: TodayWeatherReportUiState by mutableStateOf(
         TodayWeatherReportUiState.Loading
@@ -48,29 +57,38 @@ class HomeViewModel(weatherAppRepository: WeatherAppRepository) : ViewModel() {
     )
 
     init {
-        viewModelScope.launch {
-            weatherUIState = WeatherUIState.Loading
-            try {
-                val lat = "34.38586232938427"
-                val long = "36.009997289005724"
-                val todayForecast = weatherAppRepository.getTodayForecast(lat, long)
+        weatherLocationRepository.getCurrentLocation { location ->
+            viewModelScope.launch {
+                weatherUIState = WeatherUIState.Loading
+                try {
+                    var lat = weatherAppPreferencesRepository.localLatitude.first()
+                    var long = weatherAppPreferencesRepository.localLongitude.first()
+                    if (location != null) {
+                        lat = location.latitude.toString()
+                        long = location.longitude.toString()
 
-                weatherUIState = WeatherUIState.Success(
-                    weatherAppRepository.getCurrentWeather(lat, long),
-                    todayForecast,
-                    weatherAppRepository.getUpcomingDaysForecast(lat, long)
-                )
+                        weatherAppPreferencesRepository.saveLatitude(lat)
+                        weatherAppPreferencesRepository.saveLongitude(long)
+                    }
 
-                delay(1000)
-                todayWeatherReportUiState = try {
-                    TodayWeatherReportUiState.Success(model.generateContent("give me summary for today weather from these data $todayForecast").text)
-                } catch (e: Exception) {
-                    TodayWeatherReportUiState.Error
+                    val todayForecast = weatherAppRepository.getTodayForecast(lat, long)
+
+                    weatherUIState = WeatherUIState.Success(
+                        weatherAppRepository.getCurrentWeather(lat, long),
+                        todayForecast,
+                        weatherAppRepository.getUpcomingDaysForecast(lat, long)
+                    )
+
+                    todayWeatherReportUiState = try {
+                        TodayWeatherReportUiState.Success(model.generateContent("give me summary for today weather from these data $todayForecast").text)
+                    } catch (e: Exception) {
+                        TodayWeatherReportUiState.Error
+                    }
+                } catch (e: IOException) {
+                    weatherUIState = WeatherUIState.Error
+                } catch (e: HttpException) {
+                    weatherUIState = WeatherUIState.Error
                 }
-            } catch (e: IOException) {
-                weatherUIState = WeatherUIState.Error
-            } catch (e: HttpException) {
-                weatherUIState = WeatherUIState.Error
             }
         }
     }
@@ -79,7 +97,11 @@ class HomeViewModel(weatherAppRepository: WeatherAppRepository) : ViewModel() {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val application = this[APPLICATION_KEY] as WeatherApplication
-                HomeViewModel(application.container.weatherAppRepository)
+                HomeViewModel(
+                    application.container.weatherAppRepository,
+                    application.container.weatherLocationRepository,
+                    application.container.weatherAppPreferencesRepository
+                )
             }
         }
     }

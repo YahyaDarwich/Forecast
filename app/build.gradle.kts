@@ -62,6 +62,9 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    lint {
+        checkReleaseBuilds = false
+    }
 }
 
 fun getProperties(key: String): String {
@@ -97,6 +100,9 @@ dependencies {
     implementation(libs.androidx.glance.material3)
     implementation(libs.androidx.glance.appwidget)
     implementation(libs.generativeai)
+    implementation(libs.play.services.location)
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.accompanist.systemuicontroller)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

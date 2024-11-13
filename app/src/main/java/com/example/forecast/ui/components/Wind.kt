@@ -94,7 +94,7 @@ fun Wind(
                         center.y + radius * sin(Math.toRadians((-90 + degree).toDouble())).toFloat()
                     )
 
-                    val lineLength = 10.dp.toPx() // Adjust the length as needed
+                    val lineLength = 15.dp.toPx() // Adjust the length as needed
                     val lineStart = Offset(
                         lineEnd.x - lineLength * cos(Math.toRadians((-90 + degree).toDouble())).toFloat(),
                         lineEnd.y - lineLength * sin(Math.toRadians((-90 + degree).toDouble())).toFloat()

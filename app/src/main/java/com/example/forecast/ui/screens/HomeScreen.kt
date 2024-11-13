@@ -29,6 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,6 +44,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
@@ -66,6 +68,7 @@ import com.example.forecast.ui.components.MinMaxTemp
 import com.example.forecast.ui.components.RainFall
 import com.example.forecast.ui.components.TodayForecast
 import com.example.forecast.ui.components.Wind
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlin.math.roundToInt
 
 @Composable
@@ -78,7 +81,7 @@ fun HomeScreen(
         is WeatherUIState.Loading -> LoadingBody()
         is WeatherUIState.Success ->
             HomeBody(
-                Modifier,
+                Modifier.padding(paddingValues),
                 weatherUIState.currentWeather,
                 weatherUIState.todayForecast,
                 weatherUIState.upcomingDaysForecast,
@@ -104,6 +107,8 @@ fun HomeBody(
         iconCode = currentWeather.weather[0].icon,
         temperature = currentWeather.main.temp.roundToInt()
     ).map { colorResource(id = it) }
+
+    SetStatusBarColor(color = colors[0])
 
     val overlayColor = getWeatherOverlayColor(
         id = currentWeather.weather[0].id,
@@ -140,7 +145,7 @@ fun HomeBody(
                 iconRes = R.drawable.baseline_place_24,
                 iconDesc = "place",
                 modifier = Modifier
-                    .padding(top = dimensionResource(id = R.dimen.padding_extra_large))
+                    .padding(top = dimensionResource(id = R.dimen.padding_large))
                     .align(Alignment.Start),
                 iconModifier = Modifier
                     .padding(end = 5.dp)
@@ -162,7 +167,7 @@ fun HomeBody(
                 currentWeather.main.temp_min.roundToInt(),
                 color = itemsOverlayColor,
                 textColor = Color.White,
-                elevation = 1.dp,
+                elevation = 0.dp,
                 modifier = Modifier
                     .align(Alignment.Start)
                     .size(100.dp, 75.dp)
@@ -520,6 +525,14 @@ fun getWeatherIcon(id: Int, iconCode: String): Int {
         781 -> R.drawable.tornado
         741 -> R.drawable.fog
         else -> R.drawable.mist
+    }
+}
+
+@Composable
+fun SetStatusBarColor(color: Color) {
+    val systemUiController = rememberSystemUiController()
+    SideEffect {
+        systemUiController.setStatusBarColor(color = color, darkIcons = color.luminance() > 0.5f)
     }
 }
 

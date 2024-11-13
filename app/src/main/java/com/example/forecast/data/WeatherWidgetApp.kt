@@ -60,6 +60,8 @@ import com.example.forecast.ui.components.MaxMinTempWidget
 import com.example.forecast.ui.screens.getWeatherColor
 import com.example.forecast.ui.screens.getWeatherIcon
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
 
@@ -75,11 +77,11 @@ class WeatherWidgetApp : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val application = context.applicationContext as WeatherApplication
         val weatherAppRepository = application.container.weatherAppRepository
+        val weatherAppPreferencesRepository = application.container.weatherAppPreferencesRepository
         var isErrorLoading = false
 
-        val lat = "34.38586232938427"
-        val long = "36.009997289005724"
-
+        val lat = weatherAppPreferencesRepository.localLatitude.first()
+        val long = weatherAppPreferencesRepository.localLongitude.first()
         var currentWeather: CurrentWeather?
 
         try {

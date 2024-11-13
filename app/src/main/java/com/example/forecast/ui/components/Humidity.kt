@@ -47,7 +47,7 @@ fun Humidity(
 
     val progress by animateFloatAsState(
         targetValue = percentage,
-        animationSpec = tween(durationMillis = 1500, easing = LinearEasing),
+        animationSpec = tween(durationMillis = 1500),
         label = "percentage"
     )
 
@@ -78,11 +78,14 @@ fun Humidity(
                         .padding(end = 5.dp)
                 )
 
-                Text(
-                    text = "${(progress * 100).toInt()}%",
+                AnimatedTextCounter(
+                    count = (progress * 100).toInt(),
+                    suffixText = "%",
+                    animDuration = 110,
+                    modifier = Modifier,
                     fontSize = 25.sp,
-                    color = Color.White,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White
                 )
             }
 
