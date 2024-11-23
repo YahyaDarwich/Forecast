@@ -118,11 +118,7 @@ class WeatherWidgetApp : GlanceAppWidget() {
                 ImageProvider(R.drawable.rectangle),
                 colorFilter = ColorFilter.tint(
                     ColorProvider(
-                        getWeatherColor(
-                            id = currentWeather.weather[0].id,
-                            iconCode = currentWeather.weather[0].icon,
-                            temperature = currentWeather.main.temp.roundToInt()
-                        )[1]
+                        getWeatherColor(currentWeather)[1]
                     )
                 )
             ).fillMaxSize().clickable(actionStartActivity<MainActivity>())
