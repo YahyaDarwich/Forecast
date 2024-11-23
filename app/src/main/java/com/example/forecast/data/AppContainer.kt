@@ -19,7 +19,7 @@ class DefaultAppContainer(
     private val context: Context,
     private val dataStore: DataStore<Preferences>
 ) : AppContainer {
-    private val baseUrl = "https://api.openweathermap.org/data/2.5/"
+    private val baseUrl = "https://api.openweathermap.org/"
     private val okhttpClient = OkHttpClient.Builder().build()
     private val retrofit: Retrofit =
         Retrofit.Builder().addConverterFactory(GsonConverterFactory.create()).baseUrl(baseUrl)

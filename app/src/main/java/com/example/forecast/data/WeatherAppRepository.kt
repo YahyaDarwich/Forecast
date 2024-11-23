@@ -1,6 +1,7 @@
 package com.example.forecast.data
 
 import com.example.forecast.model.CurrentWeather
+import com.example.forecast.model.Location
 import com.example.forecast.network.WeatherApiService
 import com.example.forecast.utils.DateHelper
 
@@ -11,6 +12,8 @@ interface WeatherAppRepository {
         lat: String,
         long: String
     ): Map<String, MutableList<CurrentWeather>>
+
+    suspend fun searchLocation(name: String): List<Location>
 }
 
 class NetworkWeatherAppRepository(private val weatherApiService: WeatherApiService) :
@@ -56,4 +59,6 @@ class NetworkWeatherAppRepository(private val weatherApiService: WeatherApiServi
 
         return upcomingDaysForecast
     }
+
+    override suspend fun searchLocation(name: String): List<Location> = weatherApiService.searchLocation(name)
 }
