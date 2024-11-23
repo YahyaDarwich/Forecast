@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -30,7 +29,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -66,6 +64,7 @@ import com.example.forecast.ui.components.Humidity
 import com.example.forecast.ui.components.IconLabelItem
 import com.example.forecast.ui.components.MinMaxTemp
 import com.example.forecast.ui.components.RainFall
+import com.example.forecast.ui.components.SearchBar
 import com.example.forecast.ui.components.TodayForecast
 import com.example.forecast.ui.components.Wind
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -102,11 +101,7 @@ fun HomeBody(
 ) {
     val scrollState = rememberScrollState()
 
-    val colors = getWeatherColor(
-        id = currentWeather.weather[0].id,
-        iconCode = currentWeather.weather[0].icon,
-        temperature = currentWeather.main.temp.roundToInt()
-    ).map { colorResource(id = it) }
+    val colors = getWeatherColor(currentWeather).map { colorResource(id = it) }
 
     SetStatusBarColor(color = colors[0])
 
@@ -139,18 +134,20 @@ fun HomeBody(
                 .fillMaxSize()
                 .verticalScroll(scrollState)
         ) {
-            IconLabelItem(
-                label = currentWeather.name ?: "",
-                fontSize = 15.sp,
-                iconRes = R.drawable.baseline_place_24,
-                iconDesc = "place",
-                modifier = Modifier
-                    .padding(top = dimensionResource(id = R.dimen.padding_large))
-                    .align(Alignment.Start),
-                iconModifier = Modifier
-                    .padding(end = 5.dp)
-                    .size(14.dp)
-            )
+            if (currentWeather.name?.isNotEmpty() == true) {
+                IconLabelItem(
+                    label = currentWeather.name,
+                    fontSize = 15.sp,
+                    iconRes = R.drawable.baseline_place_24,
+                    iconDesc = "place",
+                    modifier = Modifier
+                        .padding(top = dimensionResource(id = R.dimen.padding_large))
+                        .align(Alignment.Start),
+                    iconModifier = Modifier
+                        .padding(end = 5.dp)
+                        .size(14.dp)
+                )
+            }
 
             HomeMainTempInfo(
                 temperature = currentWeather.main.temp.roundToInt(),
@@ -200,7 +197,7 @@ fun HomeBody(
                 pressure = currentWeather.main.pressure,
                 cornerRadius = cornerRadius,
                 color = itemsOverlayColor,
-                dividerColor = MaterialTheme.colorScheme.onBackground,
+                dividerColor = Color.White,
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
                     .wrapContentHeight()
@@ -332,6 +329,8 @@ fun GridWeatherInfo(
 @Preview
 @Composable
 fun LoadingBody() {
+    SetStatusBarColor(color = MaterialTheme.colorScheme.background)
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
@@ -538,7 +537,11 @@ fun SetStatusBarColor(color: Color) {
 
 @Composable
 @ReadOnlyComposable
-fun getWeatherColor(id: Int, iconCode: String, temperature: Int): List<Int> {
+fun getWeatherColor(currentWeather: CurrentWeather): List<Int> {
+    val id = currentWeather.weather[0].id
+    val iconCode = currentWeather.weather[0].icon
+    val temperature = currentWeather.main.temp.roundToInt()
+
     return when (id) {
         800 -> if (iconCode.contains("d")) listOf(
             R.color.clear_day_1, R.color.clear_day_2

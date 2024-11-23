@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -68,14 +69,13 @@ fun HomeShortWeatherInfo(
                             .padding(end = 5.dp)
                     )
 
-                    Text(text = "${feelsLike}°")
+                    Text(text = "${feelsLike}°", color = Color.White)
                 }
 
-                Box(
+                Divider(
                     modifier = Modifier
                         .width(1.dp)
-                        .height(20.dp)
-                        .background(dividerColor)
+                        .height(20.dp), color = dividerColor
                 )
 
                 Column(
@@ -94,14 +94,13 @@ fun HomeShortWeatherInfo(
                             .padding(end = 5.dp)
                     )
 
-                    Text(text = "${humidity}%")
+                    Text(text = "${humidity}%", color = Color.White)
                 }
 
-                Box(
+                Divider(
                     modifier = Modifier
                         .width(1.dp)
-                        .height(20.dp)
-                        .background(dividerColor)
+                        .height(20.dp), color = dividerColor
                 )
 
                 Column(
@@ -120,7 +119,7 @@ fun HomeShortWeatherInfo(
                             .padding(end = 5.dp)
                     )
 
-                    Text(text = "$pressure hPa")
+                    Text(text = "$pressure hPa", color = Color.White)
                 }
             }
         }

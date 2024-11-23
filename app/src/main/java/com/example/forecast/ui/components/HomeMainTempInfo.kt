@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.capitalize
@@ -32,7 +33,7 @@ fun HomeMainTempInfo(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically, modifier = modifier
     ) {
-        Text(text = "$temperature°", fontSize = 130.sp)
+        Text(text = "$temperature°", fontSize = 130.sp, color = Color.White)
 
         Image(
             painter = painterResource(id = weatherIcon),

@@ -138,6 +138,7 @@ fun AiTodayWeatherReport(
                     overflow = TextOverflow.Ellipsis,
                     text = weatherReport,
                     textAlign = TextAlign.Start,
+                    color = Color.White,
                     maxLines = if (isExpanded) Int.MAX_VALUE else collapsedMaxLines
                 )
             }
