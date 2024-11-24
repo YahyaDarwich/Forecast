@@ -1,10 +1,6 @@
 package com.example.forecast.data
 
-import android.appwidget.AppWidgetManager
-import android.appwidget.AppWidgetProvider
-import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.graphics.Color
@@ -12,14 +8,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.glance.ColorFilter
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
 import androidx.glance.Image
 import androidx.glance.ImageProvider
-import androidx.glance.LocalContext
 import androidx.glance.LocalSize
 import androidx.glance.action.ActionParameters
 import androidx.glance.action.actionParametersOf
@@ -30,7 +24,6 @@ import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.action.actionRunCallback
-import androidx.glance.appwidget.components.Scaffold
 import androidx.glance.appwidget.provideContent
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.background
@@ -38,13 +31,11 @@ import androidx.glance.currentState
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
-import androidx.glance.layout.Row
 import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
-import androidx.glance.layout.width
 import androidx.glance.layout.wrapContentWidth
 import androidx.glance.state.GlanceStateDefinition
 import androidx.glance.state.PreferencesGlanceStateDefinition
@@ -61,7 +52,6 @@ import com.example.forecast.ui.screens.getWeatherColor
 import com.example.forecast.ui.screens.getWeatherIcon
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
 
@@ -69,13 +59,17 @@ private val shouldRefreshKey = booleanPreferencesKey("refresh-key")
 private val refreshParamKey = ActionParameters.Key<Boolean>("refresh-key")
 
 class WeatherWidgetApp : GlanceAppWidget() {
-    override val stateDefinition: GlanceStateDefinition<*>?
+    override val stateDefinition: GlanceStateDefinition<*>
         get() = PreferencesGlanceStateDefinition
     override val sizeMode: SizeMode
         get() = SizeMode.Exact
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val application = context.applicationContext as WeatherApplication
+        val connectivityRepository = application.container.connectivityRepository
+
+        if (!connectivityRepository.isInternetAvailable()) return
+
         val weatherAppRepository = application.container.weatherAppRepository
         val weatherAppPreferencesRepository = application.container.weatherAppPreferencesRepository
         var isErrorLoading = false
@@ -94,7 +88,7 @@ class WeatherWidgetApp : GlanceAppWidget() {
         }
 
         provideContent {
-            var shouldRefresh = currentState<Preferences>()[shouldRefreshKey] ?: false
+            val shouldRefresh = currentState<Preferences>()[shouldRefreshKey] ?: false
 
             GlanceTheme {
                 key(LocalSize.current) {
