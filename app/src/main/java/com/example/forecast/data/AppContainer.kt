@@ -13,6 +13,7 @@ interface AppContainer {
     val weatherAppRepository: WeatherAppRepository
     val weatherLocationRepository: LocationRepository
     val weatherAppPreferencesRepository: WeatherAppPreferencesRepository
+    val connectivityRepository: ConnectivityRepository
 }
 
 class DefaultAppContainer(
@@ -36,6 +37,10 @@ class DefaultAppContainer(
 
     override val weatherLocationRepository: LocationRepository by lazy {
         WeatherLocationRepository(LocationHelper(context))
+    }
+
+    override val connectivityRepository: ConnectivityRepository by lazy {
+        ConnectivityRepository(context)
     }
 
     override val weatherAppPreferencesRepository: WeatherAppPreferencesRepository by lazy {
