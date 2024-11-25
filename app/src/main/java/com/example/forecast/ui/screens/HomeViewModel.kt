@@ -41,9 +41,6 @@ class HomeViewModel(
         "gemini-1.5-flash",
         BuildConfig.geminiApiKey,
         generationConfig = generationConfig {
-            temperature = 1f
-            topK = 64
-            topP = 0.95f
             maxOutputTokens = 8192
             responseMimeType = "text/plain"
         }, safetySettings = listOf(
