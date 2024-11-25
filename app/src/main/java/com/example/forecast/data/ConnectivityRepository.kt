@@ -7,19 +7,17 @@ import androidx.core.content.ContextCompat
 
 class ConnectivityRepository(private val context: Context) {
     fun isInternetAvailable(): Boolean {
-        var isInternetAvailable = false
-
         val connectivityManager =
             ContextCompat.getSystemService(context, ConnectivityManager::class.java)
 
         connectivityManager?.let {
             val network = it.activeNetwork
-            val capabilities = it.getNetworkCapabilities(network)
+            val capabilities = it.getNetworkCapabilities(network) ?: return false
 
-            isInternetAvailable =
-                capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) ?: false
+            return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                    && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
         }
 
-        return isInternetAvailable
+        return false
     }
 }
