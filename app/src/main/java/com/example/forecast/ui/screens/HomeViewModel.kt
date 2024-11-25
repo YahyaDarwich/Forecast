@@ -57,23 +57,17 @@ class HomeViewModel(
     init {
         weatherLocationRepository.getCurrentLocation { location ->
             viewModelScope.launch(Dispatchers.IO) {
-                try {
-                    var lat = weatherAppPreferencesRepository.localLatitude.first()
-                    var long = weatherAppPreferencesRepository.localLongitude.first()
-                    if (location != null) {
-                        lat = location.latitude.toString()
-                        long = location.longitude.toString()
+                var lat = weatherAppPreferencesRepository.localLatitude.first()
+                var long = weatherAppPreferencesRepository.localLongitude.first()
+                if (location != null) {
+                    lat = location.latitude.toString()
+                    long = location.longitude.toString()
 
-                        weatherAppPreferencesRepository.saveLatitude(lat)
-                        weatherAppPreferencesRepository.saveLongitude(long)
-                    }
-
-                    loadWeather(lat, long)
-                } catch (e: IOException) {
-                    weatherUIState = WeatherUIState.Error
-                } catch (e: HttpException) {
-                    weatherUIState = WeatherUIState.Error
+                    weatherAppPreferencesRepository.saveLatitude(lat)
+                    weatherAppPreferencesRepository.saveLongitude(long)
                 }
+
+                loadWeather(lat, long)
             }
         }
     }
@@ -83,19 +77,29 @@ class HomeViewModel(
         todayWeatherReportUiState = TodayWeatherReportUiState.Loading
 
         viewModelScope.launch(Dispatchers.IO) {
-            val todayForecast = weatherAppRepository.getTodayForecast(lat, long)
+            var todayForecast: List<CurrentWeather> = listOf()
 
-            weatherUIState = WeatherUIState.Success(
-                weatherAppRepository.getCurrentWeather(lat, long),
-                todayForecast,
-                weatherAppRepository.getUpcomingDaysForecast(lat, long)
-            )
+            weatherUIState = try {
+                todayForecast = weatherAppRepository.getTodayForecast(lat, long)
 
-            todayWeatherReportUiState = try {
-                TodayWeatherReportUiState.Success(model.generateContent("give me summary for today weather from these data $todayForecast").text)
-            } catch (e: Exception) {
-                TodayWeatherReportUiState.Error
+                WeatherUIState.Success(
+                    weatherAppRepository.getCurrentWeather(lat, long),
+                    todayForecast,
+                    weatherAppRepository.getUpcomingDaysForecast(lat, long)
+                )
+            } catch (e: IOException) {
+                WeatherUIState.Error
+            } catch (e: HttpException) {
+                WeatherUIState.Error
             }
+
+            todayWeatherReportUiState = if (todayForecast.isNotEmpty()) {
+                try {
+                    TodayWeatherReportUiState.Success(model.generateContent("give me summary for today weather from these data $todayForecast").text)
+                } catch (e: Exception) {
+                    TodayWeatherReportUiState.Error
+                }
+            } else TodayWeatherReportUiState.Error
         }
     }
 
