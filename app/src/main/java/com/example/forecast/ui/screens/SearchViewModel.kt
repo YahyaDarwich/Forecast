@@ -20,22 +20,33 @@ class SearchViewModel(
     private val weatherAppRepository: WeatherAppRepository
 ) : ViewModel() {
     var weatherSearchUiState: WeatherSearchUiState by mutableStateOf(WeatherSearchUiState.Loading)
+    private lateinit var loadedLocation: String
+
+    init {
+        loadedLocation = ""
+    }
 
     fun onSearch(value: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            weatherSearchUiState = if (value.length > 2) {
+            if (value.isNotBlank() && value.trim().length > 2) {
                 try {
-                    val locations = weatherAppRepository.searchLocation(value)
+                    if (value.trim() != loadedLocation) {
+                        val locations = weatherAppRepository.searchLocation(value.trim())
 
-                    if (locations.isNotEmpty())
-                        WeatherSearchUiState.Success(locations)
-                    else WeatherSearchUiState.Loading
+                        weatherSearchUiState = if (locations.isNotEmpty()) {
+                            loadedLocation = value.trim()
+                            WeatherSearchUiState.Success(locations)
+                        } else WeatherSearchUiState.Loading
+                    }
                 } catch (e: IOException) {
-                    WeatherSearchUiState.Error
+                    weatherSearchUiState = WeatherSearchUiState.Error
                 } catch (e: HttpException) {
-                    WeatherSearchUiState.Error
+                    weatherSearchUiState = WeatherSearchUiState.Error
                 }
-            } else WeatherSearchUiState.Loading
+            } else {
+                weatherSearchUiState = WeatherSearchUiState.Loading
+                loadedLocation = ""
+            }
         }
     }
 

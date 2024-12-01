@@ -122,7 +122,7 @@ fun SearchBar(
                         cursorColor = Color.White
                     ),
                     trailingIcon = {
-                        if (searchText.isNotEmpty()) {
+                        if (searchText.isNotBlank() && searchText.length > 2) {
                             IconButton(onClick = {
                                 focusManager.clearFocus()
                                 searchText = ""
