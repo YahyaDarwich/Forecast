@@ -58,7 +58,8 @@ class MainActivity : ComponentActivity() {
                     HomeScreen(
                         weatherUIState = weatherUIState,
                         todayWeatherReportUiState = homeViewModel.todayWeatherReportUiState,
-                        paddingValues = innerPadding
+                        paddingValues = innerPadding,
+                        onRetry = { homeViewModel.reloadLastCalledWeather() }
                     )
 
                     when (weatherUIState) {

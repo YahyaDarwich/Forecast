@@ -1,5 +1,6 @@
 package com.example.forecast.ui.screens
 
+import android.location.Location
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -28,14 +29,17 @@ import java.io.IOException
 
 class HomeViewModel(
     private val weatherAppRepository: WeatherAppRepository,
-    weatherLocationRepository: LocationRepository,
-    weatherAppPreferencesRepository: WeatherAppPreferencesRepository
+    private val weatherLocationRepository: LocationRepository,
+    private val weatherAppPreferencesRepository: WeatherAppPreferencesRepository
 ) : ViewModel() {
     var weatherUIState: WeatherUIState by mutableStateOf(WeatherUIState.Loading)
 
     var todayWeatherReportUiState: TodayWeatherReportUiState by mutableStateOf(
         TodayWeatherReportUiState.Loading
     )
+
+    private lateinit var loadedLat: String
+    private lateinit var loadedLong: String
 
     private val model: GenerativeModel = GenerativeModel(
         "gemini-1.5-flash",
@@ -52,22 +56,37 @@ class HomeViewModel(
     )
 
     init {
+        getCurrentWeatherAndLoad()
+    }
+
+    private fun getCurrentWeatherAndLoad() {
         weatherLocationRepository.getCurrentLocation { location ->
             viewModelScope.launch(Dispatchers.IO) {
-                var lat = weatherAppPreferencesRepository.localLatitude.first()
-                var long = weatherAppPreferencesRepository.localLongitude.first()
-                if (location != null) {
-                    lat = location.latitude.toString()
-                    long = location.longitude.toString()
-
-                    weatherAppPreferencesRepository.saveLatitude(lat)
-                    weatherAppPreferencesRepository.saveLongitude(long)
-                }
-
-                loadWeather(lat, long)
+                getLatLongAndLoad(location)
             }
         }
     }
+
+    private suspend fun getLatLongAndLoad(location: Location?) {
+        var lat = weatherAppPreferencesRepository.localLatitude.first()
+        var long = weatherAppPreferencesRepository.localLongitude.first()
+        if (location != null) {
+            lat = location.latitude.toString()
+            long = location.longitude.toString()
+
+            weatherAppPreferencesRepository.saveLatitude(lat)
+            weatherAppPreferencesRepository.saveLongitude(long)
+        }
+
+        loadWeather(lat, long)
+    }
+
+    fun reloadLastCalledWeather() {
+        if (loadedLat.isNotBlank() && loadedLong.isNotBlank()) {
+            loadWeather(loadedLat, loadedLong)
+        }
+    }
+
 
     fun loadWeather(lat: String, long: String) {
         weatherUIState = WeatherUIState.Loading
@@ -77,6 +96,9 @@ class HomeViewModel(
             var todayForecast: List<CurrentWeather> = listOf()
 
             weatherUIState = try {
+                loadedLat = lat
+                loadedLong = long
+
                 todayForecast = weatherAppRepository.getTodayForecast(lat, long)
 
                 WeatherUIState.Success(

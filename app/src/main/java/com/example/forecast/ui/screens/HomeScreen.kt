@@ -24,8 +24,10 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.SideEffect
@@ -74,7 +76,8 @@ import kotlin.math.roundToInt
 fun HomeScreen(
     weatherUIState: WeatherUIState,
     todayWeatherReportUiState: TodayWeatherReportUiState,
-    paddingValues: PaddingValues
+    paddingValues: PaddingValues,
+    onRetry: () -> Unit = {}
 ) {
     when (weatherUIState) {
         is WeatherUIState.Loading -> LoadingBody()
@@ -87,7 +90,16 @@ fun HomeScreen(
                 todayWeatherReportUiState
             )
 
-        is WeatherUIState.Error -> Text(text = "error")
+        is WeatherUIState.Error -> AlertDialog(
+            onDismissRequest = { },
+            confirmButton = {
+                TextButton(onClick = onRetry) {
+                    Text(text = "Retry")
+                }
+            },
+            title = { Text(text = "Error") },
+            text = { Text(text = "Something went wrong") },
+        )
     }
 }
 
