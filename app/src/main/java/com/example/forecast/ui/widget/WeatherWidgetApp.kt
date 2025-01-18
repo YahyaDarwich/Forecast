@@ -1,4 +1,4 @@
-package com.example.forecast.data
+package com.example.forecast.ui.widget
 
 import android.content.Context
 import androidx.compose.runtime.Composable
@@ -6,8 +6,6 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.glance.ColorFilter
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
@@ -16,16 +14,15 @@ import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.LocalSize
 import androidx.glance.action.ActionParameters
-import androidx.glance.action.actionParametersOf
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
+import androidx.glance.appwidget.CircularProgressIndicator
 import androidx.glance.appwidget.GlanceAppWidget
-import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.action.actionRunCallback
+import androidx.glance.appwidget.appWidgetBackground
 import androidx.glance.appwidget.provideContent
-import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.background
 import androidx.glance.currentState
 import androidx.glance.layout.Alignment
@@ -36,65 +33,54 @@ import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
+import androidx.glance.layout.wrapContentSize
 import androidx.glance.layout.wrapContentWidth
-import androidx.glance.state.GlanceStateDefinition
-import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
+import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.example.forecast.MainActivity
 import com.example.forecast.R
-import com.example.forecast.WeatherApplication
 import com.example.forecast.model.CurrentWeather
 import com.example.forecast.ui.components.MaxMinTempWidget
 import com.example.forecast.ui.screens.getWeatherColor
 import com.example.forecast.ui.screens.getWeatherIcon
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
 
-private val shouldRefreshKey = booleanPreferencesKey("refresh-key")
-private val refreshParamKey = ActionParameters.Key<Boolean>("refresh-key")
 
 class WeatherWidgetApp : GlanceAppWidget() {
-    override val stateDefinition: GlanceStateDefinition<*>
-        get() = PreferencesGlanceStateDefinition
+    override val stateDefinition = WeatherWidgetStateDefinition
     override val sizeMode: SizeMode
         get() = SizeMode.Exact
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val application = context.applicationContext as WeatherApplication
-        val connectivityRepository = application.container.connectivityRepository
-
-        if (!connectivityRepository.isInternetAvailable()) return
-
-        val weatherAppRepository = application.container.weatherAppRepository
-        val weatherAppPreferencesRepository = application.container.weatherAppPreferencesRepository
-        var isErrorLoading = false
-
-        val lat = weatherAppPreferencesRepository.localLatitude.first()
-        val long = weatherAppPreferencesRepository.localLongitude.first()
-        var currentWeather: CurrentWeather?
-
-        try {
-            currentWeather = withContext(Dispatchers.IO) {
-                weatherAppRepository.getCurrentWeather(lat, long)
-            }
-        } catch (e: Exception) {
-            currentWeather = null
-            isErrorLoading = true
-        }
-
         provideContent {
-            val shouldRefresh = currentState<Preferences>()[shouldRefreshKey] ?: false
+            Content()
+        }
+    }
 
-            GlanceTheme {
-                key(LocalSize.current) {
-                    if (!isErrorLoading && currentWeather != null) Body(currentWeather)
-                    else {
-                        RefreshAction(shouldRefresh)
+    @Composable
+    fun Content() {
+        val state = currentState<WeatherWidgetState>()
+
+        GlanceTheme {
+            key(LocalSize.current) {
+                when (state) {
+                    is WeatherWidgetState.Loading ->
+                        Box(
+                            modifier = GlanceModifier.appWidgetBackground(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+
+                    is WeatherWidgetState.Success -> {
+                        Body(state.currentWeather)
+                    }
+
+                    is WeatherWidgetState.Error -> {
+                        Refresh(state.message)
                     }
                 }
             }
@@ -200,9 +186,9 @@ class WeatherWidgetApp : GlanceAppWidget() {
     }
 
     @Composable
-    fun RefreshAction(refresh: Boolean) {
+    fun Refresh(error: String) {
         Box(
-            contentAlignment = Alignment.Center, modifier = GlanceModifier.background(
+            modifier = GlanceModifier.background(
                 ColorProvider(
                     color = Color.Black.copy(
                         alpha = 0.5f
@@ -210,22 +196,30 @@ class WeatherWidgetApp : GlanceAppWidget() {
                 )
             ).fillMaxSize()
         ) {
-            Image(
-                modifier = GlanceModifier.size(50.dp).clickable(
-                    actionRunCallback<RefreshAction>(
-                        parameters = actionParametersOf(refreshParamKey to !refresh)
+            Column(
+                modifier = GlanceModifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    modifier = GlanceModifier.size(50.dp).clickable(
+                        actionRunCallback<RefreshAction>()
+                    ),
+                    provider = ImageProvider(R.drawable.baseline_refresh_24),
+                    contentDescription = "refresh"
+                )
+
+                Text(
+                    text = error,
+                    style = TextStyle(
+                        fontSize = 15.sp,
+                        textAlign = TextAlign.Center,
+                        color = ColorProvider(Color.White)
                     )
-                ),
-                provider = ImageProvider(R.drawable.baseline_refresh_24),
-                contentDescription = "refresh"
-            )
+                )
+            }
         }
     }
-}
-
-class WeatherWidgetReceiver : GlanceAppWidgetReceiver() {
-    override val glanceAppWidget: GlanceAppWidget
-        get() = WeatherWidgetApp()
 }
 
 class RefreshAction : ActionCallback {
@@ -234,19 +228,6 @@ class RefreshAction : ActionCallback {
         glanceId: GlanceId,
         parameters: ActionParameters
     ) {
-        val refresh = requireNotNull(parameters[refreshParamKey])
-
-        updateAppWidgetState(
-            context = context,
-            definition = PreferencesGlanceStateDefinition,
-            glanceId = glanceId
-        ) {
-            it.toMutablePreferences()
-                .apply {
-                    this[shouldRefreshKey] = !refresh
-                }
-        }
-
-        WeatherWidgetApp().update(context, glanceId)
+        WeatherWorker.enqueue(context, true)
     }
 }
