@@ -31,8 +31,8 @@
         </activity>
 
         <receiver
-            android:name=".data.WeatherWidgetReceiver"
-            android:exported="false">
+            android:name=".ui.widget.WeatherWidgetReceiver"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -40,6 +40,10 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/weather_widget_provider" />
         </receiver>
+
+        <receiver
+            android:name=".network.WidgetPinBroadcastReceiver"
+            android:exported="false" />
     </application>
 
 </manifest>
