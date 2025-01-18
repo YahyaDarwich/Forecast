@@ -102,9 +102,9 @@ fun TodayForecast(
                     )
                 )
         ) {
-            items(items = todayForecast, key = { it.dt_txt }) {
+            items(items = todayForecast, key = { it.dt_txt ?: "" }) {
                 TimeWeatherInfoItem(
-                    DateHelper.formatDate(it.dt_txt).uppercase(Locale.getDefault()),
+                    DateHelper.formatDate(it.dt_txt ?: "").uppercase(Locale.getDefault()),
                     getWeatherIcon(it.weather[0].id, it.weather[0].icon),
                     it.main.feels_like.toInt(),
                     it.main.humidity,

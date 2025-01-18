@@ -56,7 +56,7 @@ fun ComingDaysForecast(
 
                 ComingDayItem(
                     dayName = if (index == 0) "today" else DateHelper.formatDate(
-                        weather1.dt_txt,
+                        weather1.dt_txt ?: "",
                         outputPattern = "EEEE"
                     ),
                     humidity = (weather1.main.humidity + (weather2?.main?.humidity ?: 0)) / 2,

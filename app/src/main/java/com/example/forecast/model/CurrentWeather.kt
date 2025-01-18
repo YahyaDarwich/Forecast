@@ -13,8 +13,7 @@ data class CurrentWeather(
     val clouds: Clouds,
     val id: Int,
     val name: String?,
-    val code: Int,
-    val dt_txt: String
+    val dt_txt: String?
 )
 
 @Serializable

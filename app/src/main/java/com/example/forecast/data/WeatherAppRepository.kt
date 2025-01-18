@@ -26,7 +26,7 @@ class NetworkWeatherAppRepository(private val weatherApiService: WeatherApiServi
         val todayForecast: MutableList<CurrentWeather> = mutableListOf()
 
         for (weather in forecast.list) {
-            if (DateHelper.isDateToday(weather.dt_txt)) {
+            if (DateHelper.isDateToday(weather.dt_txt ?: "")) {
                 todayForecast.add(weather)
             }
         }
@@ -44,9 +44,9 @@ class NetworkWeatherAppRepository(private val weatherApiService: WeatherApiServi
         var key: String
 
         for (weather in forecast.list) {
-            weatherHour = DateHelper.formatDate(weather.dt_txt, outputPattern = "h a")
+            weatherHour = DateHelper.formatDate(weather.dt_txt ?: "", outputPattern = "h a")
             if (weatherHour == "12 pm" || weatherHour == "9 pm") {
-                key = DateHelper.formatDate(weather.dt_txt, outputPattern = "yyyy-MM-dd")
+                key = DateHelper.formatDate(weather.dt_txt ?: "", outputPattern = "yyyy-MM-dd")
                 if (!upcomingDaysForecast.containsKey(key)) {
                     upcomingDaysForecast[key] = mutableListOf(weather)
                 } else {
@@ -60,5 +60,6 @@ class NetworkWeatherAppRepository(private val weatherApiService: WeatherApiServi
         return upcomingDaysForecast
     }
 
-    override suspend fun searchLocation(name: String): List<Location> = weatherApiService.searchLocation(name)
+    override suspend fun searchLocation(name: String): List<Location> =
+        weatherApiService.searchLocation(name)
 }
