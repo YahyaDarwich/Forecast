@@ -109,7 +109,7 @@ fun SearchScreen(
         SearchBar(
             modifier = Modifier
                 .fillMaxWidth(0.9f)
-                .padding(bottom = 30.dp),
+                .padding(bottom = 15.dp),
             iconSize = 30.dp,
             backgroundColor = colors[0],
             onValueChange = onSearch,
