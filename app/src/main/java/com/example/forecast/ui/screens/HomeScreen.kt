@@ -115,7 +115,7 @@ fun HomeBody(
 
     val colors = getWeatherColor(currentWeather).map { colorResource(id = it) }
 
-    SetStatusBarColor(color = colors[0])
+    SetStatusBarColor(colors)
 
     val overlayColor = getWeatherOverlayColor(
         id = currentWeather.weather[0].id,
@@ -129,13 +129,7 @@ fun HomeBody(
 
     Box(
         modifier = modifier
-            .drawWithCache {
-                onDrawBehind {
-                    val brush = Brush.verticalGradient(colors)
-                    drawRect(brush, blendMode = BlendMode.Multiply)
-                }
-            }
-            .background(Color.Transparent)
+            .background(Brush.verticalGradient(colors))
             .fillMaxSize()
             .padding(horizontal = dimensionResource(id = R.dimen.padding_medium))
     ) {
@@ -216,21 +210,23 @@ fun HomeBody(
                     .padding(bottom = dimensionResource(id = R.dimen.padding_mid_large))
             )
 
-            TodayForecast(
-                todayForecast = todayForecast,
-                modifier = Modifier
-                    .wrapContentHeight()
-                    .fillMaxWidth()
-                    .padding(bottom = dimensionResource(id = R.dimen.padding_medium)),
-                currentWeather = currentWeather.weather[0].description,
-                color = itemsOverlayColor,
-                cornerRadius = cornerRadius,
-                itemsBackground = Brush.verticalGradient(colors),
-                currentIconWeather = getWeatherIcon(
-                    currentWeather.weather[0].id,
-                    currentWeather.weather[0].icon
+            if (todayForecast.isNotEmpty()) {
+                TodayForecast(
+                    todayForecast = todayForecast,
+                    modifier = Modifier
+                        .wrapContentHeight()
+                        .fillMaxWidth()
+                        .padding(bottom = dimensionResource(id = R.dimen.padding_medium)),
+                    currentWeather = currentWeather.weather[0].description,
+                    color = itemsOverlayColor,
+                    cornerRadius = cornerRadius,
+                    itemsBackground = Brush.verticalGradient(colors),
+                    currentIconWeather = getWeatherIcon(
+                        currentWeather.weather[0].id,
+                        currentWeather.weather[0].icon
+                    )
                 )
-            )
+            }
 
             ComingDaysForecast(
                 daysForecast = upcomingDaysForecast,
@@ -341,7 +337,12 @@ fun GridWeatherInfo(
 @Preview
 @Composable
 fun LoadingBody() {
-    SetStatusBarColor(color = MaterialTheme.colorScheme.background)
+    SetStatusBarColor(
+        colors = listOf(
+            MaterialTheme.colorScheme.background,
+            MaterialTheme.colorScheme.background
+        )
+    )
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -540,10 +541,18 @@ fun getWeatherIcon(id: Int, iconCode: String): Int {
 }
 
 @Composable
-fun SetStatusBarColor(color: Color) {
+fun SetStatusBarColor(colors: List<Color>) {
     val systemUiController = rememberSystemUiController()
     SideEffect {
-        systemUiController.setStatusBarColor(color = color, darkIcons = color.luminance() > 0.5f)
+        systemUiController.setStatusBarColor(
+            color = colors[0],
+            darkIcons = colors[0].luminance() > 0.5f
+        )
+
+        systemUiController.setNavigationBarColor(
+            color = colors[1],
+            darkIcons = colors[1].luminance() > 0.5f
+        )
     }
 }
 
