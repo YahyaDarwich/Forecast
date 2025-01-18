@@ -1,5 +1,6 @@
 package com.example.forecast.ui.components
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
@@ -78,6 +79,12 @@ fun SearchBar(
         }
 
         onInputState(showInput)
+    }
+
+    BackHandler(enabled = showInput) {
+        searchText = ""
+        onValueChange("")
+        showInput = false
     }
 
     Column(
